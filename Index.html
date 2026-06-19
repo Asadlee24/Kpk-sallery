@@ -207,7 +207,6 @@ select:focus, input[type="number"]:focus {
     <button class="btn-calc" onclick="calc()">Analytics Statement بنائیں</button>
   </div>
 
-  <!-- RESULTS -->
   <div class="results" id="results">
 
     <div class="metrics-grid">
@@ -291,29 +290,41 @@ select:focus, input[type="number"]:focus {
   }
 
   function calc() {
-    const bps   = parseInt(document.getElementById('bps').value);
-    const basic = parseFloat(document.getElementById('basic').value);
-    const gross = parseFloat(document.getElementById('gross').value);
+    const bpsSelect = document.getElementById('bps').value;
+    const basicInput = document.getElementById('basic').value;
+    const grossInput = document.getElementById('gross').value;
 
-    if (!bps || !basic || basic <= 0 || !gross || gross <= 0) {
+    if (!bpsSelect || !basicInput || !grossInput) {
+      document.getElementById('err').classList.add('show');
+      return;
+    }
+
+    const bps   = parseInt(bpsSelect);
+    const basic = parseFloat(basicInput);
+    const gross = parseFloat(grossInput);
+
+    if (isNaN(bps) || isNaN(basic) || basic <= 0 || isNaN(gross) || gross <= 0) {
       document.getElementById('err').classList.add('show');
       return;
     }
     document.getElementById('err').classList.remove('show');
 
-    // New Basic 2026
+    // New Basic 2026 logic with protection against negative stage
     const [min22, inc22] = scale2022[bps];
     const [min26, inc26] = scale2026[bps];
-    const stage    = Math.round((basic - min22) / inc22);
+    
+    let stage = Math.round((basic - min22) / inc22);
+    if (stage < 0) stage = 0; // Guard against lower basic pay values
+    
     const newBasic = Math.min(min26 + stage * inc26, min26 + 30 * inc26);
 
-    // ONLY 2 increases
-    const ara  = Math.round(newBasic * 0.07);      // 7% of new basic
-    const conv = Math.round(conv2022[bps] * 0.50); // 50% conveyance increase
+    // Allowances
+    const ara  = Math.round(newBasic * 0.07);      
+    const conv = Math.round((conv2022[bps] || 0) * 0.50); 
 
     const increase = ara + conv;
 
-    // Tax on new gross
+    // Tax calculation
     const newGross    = gross + increase;
     const annualGross = newGross * 12;
     const annualTax   = getSlabTax(annualGross);
@@ -329,7 +340,7 @@ select:focus, input[type="number"]:focus {
 
     if (monthlyTax > 0) {
       document.getElementById('outTax').textContent    = 'Rs. ' + fmt(monthlyTax);
-      document.getElementById('outTaxSub').textContent = 'سالانہ: Rs. ' + fmt(annualGross);
+      document.getElementById('outTaxSub').textContent = 'سالانہ ٹیکس: Rs. ' + fmt(annualTax);
     } else {
       document.getElementById('outTax').textContent    = 'Tax Free';
       document.getElementById('outTaxSub').textContent = 'معاف (6 لاکھ سے کم)';
@@ -352,3 +363,5 @@ select:focus, input[type="number"]:focus {
 </script>
 </body>
 </html>
+
+```
