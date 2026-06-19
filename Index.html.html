@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salary & Tax Insights — Budget 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark:    #0f172a;
+  --blue-deep:  #1e3a8a;
+  --emerald:    #10b981;
+  --slate-text: #334155;
+  --slate-muted:#64748b;
+  --border:     #e2e8f0;
+  --white:      #ffffff;
+  --sans: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: #f1f5f9;
+  background-image: radial-gradient(at 0% 0%, #e2e8f0 0, transparent 50%), radial-gradient(at 50% 0%, #f0fdf4 0, transparent 50%);
+  color: var(--slate-text);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+  -webkit-font-smoothing: antialiased;
+}
+.card {
+  width: 100%; max-width: 520px;
+  background: var(--white);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px -15px rgba(15,23,42,0.10), 0 1px 3px rgba(0,0,0,0.03);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.header {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 50%, #064e3b 100%);
+  padding: 36px 32px; position: relative;
+  border-bottom: 4px solid var(--emerald);
+}
+.header::after {
+  content: ''; position: absolute; bottom: 0; right: 0;
+  width: 130px; height: 130px;
+  background: radial-gradient(circle, rgba(16,185,129,0.13) 0%, transparent 70%);
+  pointer-events: none;
+}
+.badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--emerald);
+  margin-bottom: 10px; display: inline-flex; align-items: center; gap: 6px;
+}
+.header h1 { font-size: 26px; font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; color: var(--white); }
+.header p  { font-size: 13px; color: #94a3b8; margin-top: 6px; font-weight: 500; }
+
+.body { padding: 32px; }
+.input-group { margin-bottom: 22px; }
+label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--bg-dark); margin-bottom: 8px;
+}
+select, input[type="number"] {
+  width: 100%; padding: 14px 18px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  color: var(--bg-dark); background: #f8fafc;
+  transition: all 0.2s;
+  appearance: none; -webkit-appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23334155' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 18px center;
+  padding-right: 44px; cursor: pointer;
+}
+select:focus, input[type="number"]:focus {
+  outline: none; border-color: var(--emerald);
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.12); background: var(--white);
+}
+.divider { height: 1px; background: var(--border); margin: 4px 0 22px; border: none; }
+.gross-note {
+  font-size: 11.5px; color: var(--slate-muted); font-weight: 500;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 22px; line-height: 1.5;
+}
+.err {
+  background: #fef2f2; border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px; padding: 14px; font-size: 13px;
+  color: #ef4444; margin-bottom: 20px; display: none; font-weight: 600;
+}
+.err.show { display: block; }
+.btn-calc {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--blue-deep) 100%);
+  color: var(--white); border: none; border-radius: 12px;
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
+  letter-spacing: 0.5px; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(30,58,138,0.2); transition: all 0.2s;
+}
+.btn-calc:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,58,138,0.3); }
+
+/* RESULTS */
+.results { display: none; padding: 0 32px 32px; }
+.results.show { display: block; animation: slideUp 0.35s ease; }
+@keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+.metric { border-radius: 16px; padding: 20px 16px; overflow: hidden; }
+.metric.blue {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  box-shadow: 0 8px 20px rgba(30,58,138,0.15);
+}
+.metric.green {
+  background: linear-gradient(135deg, #065f46 0%, #022c22 100%);
+  box-shadow: 0 8px 20px rgba(6,95,70,0.15);
+}
+.m-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; opacity: 0.75; }
+.blue .m-label { color: #93c5fd; }
+.green .m-label { color: #a7f3d0; }
+.m-val { font-family: var(--mono); font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.blue .m-val { color: #38bdf8; }
+.green .m-val { color: var(--emerald); }
+.m-sub { font-size: 11px; opacity: 0.55; margin-top: 5px; font-weight: 500; color: var(--white); }
+
+.table {
+  border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; background: var(--white); margin-bottom: 22px;
+}
+.row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.row:last-child { border-bottom: none; background: #fafafa; }
+.r-label { font-size: 13px; font-weight: 600; color: var(--slate-text); }
+.r-val { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--bg-dark); }
+
+.btn-reset {
+  width: 100%; padding: 14px; background: transparent;
+  border: 2px solid var(--border); border-radius: 12px;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  color: var(--slate-muted); cursor: pointer; transition: all 0.2s;
+}
+.btn-reset:hover { border-color: var(--blue-deep); color: var(--blue-deep); background: #f0f4ff; }
+
+.footer {
+  text-align: center; padding: 18px 24px;
+  background: #f8fafc; border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--slate-muted); font-weight: 500;
+  letter-spacing: 0.3px; line-height: 1.6;
+}
+.footer strong { color: var(--slate-text); }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="header">
+    <div class="badge">
+      <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#10b981"/></svg>
+      Official Analytics
+    </div>
+    <h1>Salary &amp; Tax Insights</h1>
+    <p>National Budget Estimates — Fiscal Reforms 2026</p>
+  </div>
+
+  <div class="body">
+    <div class="err" id="err">تصدیق ناکام: BPS Grade، Basic Pay اور Gross Salary درج کریں۔</div>
+
+    <div class="input-group">
+      <label>Pay Scale Grade (BPS)</label>
+      <select id="bps" onchange="clearResults()">
+        <option value="">BPS Category منتخب کریں</option>
+        <option value="1">BPS-01</option><option value="2">BPS-02</option>
+        <option value="3">BPS-03</option><option value="4">BPS-04</option>
+        <option value="5">BPS-05</option><option value="6">BPS-06</option>
+        <option value="7">BPS-07</option><option value="8">BPS-08</option>
+        <option value="9">BPS-09</option><option value="10">BPS-10</option>
+        <option value="11">BPS-11</option><option value="12">BPS-12</option>
+        <option value="13">BPS-13</option><option value="14">BPS-14</option>
+        <option value="15">BPS-15</option><option value="16">BPS-16</option>
+        <option value="17">BPS-17</option><option value="18">BPS-18</option>
+        <option value="19">BPS-19</option><option value="20">BPS-20</option>
+        <option value="21">BPS-21</option><option value="22">BPS-22</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>موجودہ Basic Pay (Running)</label>
+      <input type="number" id="basic" placeholder="رقم درج کریں (PKR)" oninput="clearResults()">
+    </div>
+
+    <hr class="divider">
+
+    <div class="gross-note">
+      💡 <strong>Gross Salary</strong> میں تمام allowances شامل ہیں۔ Tax اسی رقم پر نکالا جائے گا۔
+    </div>
+
+    <div class="input-group">
+      <label>موجودہ Gross Salary (ماہانہ)</label>
+      <input type="number" id="gross" placeholder="کل ماہانہ Gross درج کریں (PKR)" oninput="clearResults()">
+    </div>
+
+    <button class="btn-calc" onclick="calc()">Analytics Statement بنائیں</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+
+    <div class="metrics-grid">
+      <div class="metric blue">
+        <div class="m-label">ماہانہ اضافہ</div>
+        <div class="m-val">Rs. <span id="outIncrease">0</span></div>
+        <div class="m-sub">کل نئے allowances</div>
+      </div>
+      <div class="metric green">
+        <div class="m-label">ماہانہ Tax</div>
+        <div class="m-val" id="outTax">Rs. 0</div>
+        <div class="m-sub" id="outTaxSub">Gross پر حساب</div>
+      </div>
+    </div>
+
+    <div class="table">
+      <div class="row">
+        <div class="r-label">نئی Basic Pay (2026)</div>
+        <div class="r-val" id="outNewBasic">—</div>
+      </div>
+      <div class="row">
+        <div class="r-label">7% Increase in Basic Pay</div>
+        <div class="r-val" id="outARA">—</div>
+      </div>
+      <div class="row">
+        <div class="r-label">Conveyance Allowance (+50%)</div>
+        <div class="r-val" id="outConv">—</div>
+      </div>
+      <div class="row">
+        <div class="r-label">نئی Gross Salary (Gross + اضافہ)</div>
+        <div class="r-val" id="outNewGross">—</div>
+      </div>
+      <div class="row" style="background:#fafffe;">
+        <div class="r-label" style="color:#065f46;font-weight:700;">خالص تنخواہ (Net After Tax)</div>
+        <div class="r-val" style="color:#065f46;" id="outNet">—</div>
+      </div>
+    </div>
+
+    <button class="btn-reset" onclick="reset()">نیا حساب کریں</button>
+  </div>
+
+  <div class="footer">
+    وزارت خزانہ — خودکار معاوضہ انجن<br>
+    <strong>System Architecture: Muhammad Abdullah (Senior Auditor)</strong>
+  </div>
+
+</div>
+
+<script>
+  const scale2022 = {
+    1:[13550,430],2:[13820,490],3:[14260,580],4:[14690,660],5:[15230,750],
+    6:[15760,840],7:[16310,910],8:[16890,1000],9:[17470,1090],10:[18050,1190],
+    11:[18650,1310],12:[19770,1430],13:[21160,1560],14:[22530,1740],15:[23920,1980],
+    16:[28070,2260],17:[45070,3420],18:[56880,4260],19:[87840,4530],20:[102470,6690],
+    21:[113790,7420],22:[122190,8710]
+  };
+  const scale2026 = {
+    1:[16280,540],2:[16660,620],3:[17130,730],4:[17650,830],5:[18300,940],
+    6:[18930,1050],7:[19590,1140],8:[20290,1250],9:[20990,1370],10:[21680,1490],
+    11:[22410,1640],12:[23750,1790],13:[25420,1950],14:[27060,2180],15:[28730,2480],
+    16:[33720,2830],17:[54140,4280],18:[68330,5330],19:[105510,5670],20:[123090,8370],
+    21:[136680,9280],22:[146770,10890]
+  };
+  const conv2022 = {
+    1:1785,2:1785,3:1785,4:1785,5:1932,6:1932,7:1932,8:1932,9:1932,10:1932,
+    11:2856,12:2856,13:2856,14:2856,15:2856,
+    16:5000,17:5000,18:5000,19:5000,20:5000,21:5000,22:5000
+  };
+
+  const fmt = n => Math.round(n).toLocaleString('en-PK');
+
+  function getSlabTax(annual) {
+    if (annual <= 600000)   return 0;
+    if (annual <= 1200000)  return (annual - 600000) * 0.01;
+    if (annual <= 2400000)  return 6000 + (annual - 1200000) * 0.125;
+    if (annual <= 3600000)  return 156000 + (annual - 2400000) * 0.20;
+    if (annual <= 4800000)  return 396000 + (annual - 3600000) * 0.25;
+    if (annual <= 6000000)  return 696000 + (annual - 4800000) * 0.30;
+    if (annual <= 12000000) return 1056000 + (annual - 6000000) * 0.35;
+    return 3156000 + (annual - 12000000) * 0.35;
+  }
+
+  function calc() {
+    const bps   = parseInt(document.getElementById('bps').value);
+    const basic = parseFloat(document.getElementById('basic').value);
+    const gross = parseFloat(document.getElementById('gross').value);
+
+    if (!bps || !basic || basic <= 0 || !gross || gross <= 0) {
+      document.getElementById('err').classList.add('show');
+      return;
+    }
+    document.getElementById('err').classList.remove('show');
+
+    // New Basic 2026
+    const [min22, inc22] = scale2022[bps];
+    const [min26, inc26] = scale2026[bps];
+    const stage    = Math.round((basic - min22) / inc22);
+    const newBasic = Math.min(min26 + stage * inc26, min26 + 30 * inc26);
+
+    // ONLY 2 increases
+    const ara  = Math.round(newBasic * 0.07);      // 7% of new basic
+    const conv = Math.round(conv2022[bps] * 0.50); // 50% conveyance increase
+
+    const increase = ara + conv;
+
+    // Tax on new gross
+    const newGross    = gross + increase;
+    const annualGross = newGross * 12;
+    const annualTax   = getSlabTax(annualGross);
+    const monthlyTax  = Math.round(annualTax / 12);
+    const netSalary   = newGross - monthlyTax;
+
+    document.getElementById('outIncrease').textContent = fmt(increase);
+    document.getElementById('outNewBasic').textContent = 'Rs. ' + fmt(newBasic);
+    document.getElementById('outARA').textContent      = 'Rs. ' + fmt(ara);
+    document.getElementById('outConv').textContent     = 'Rs. ' + fmt(conv);
+    document.getElementById('outNewGross').textContent = 'Rs. ' + fmt(newGross);
+    document.getElementById('outNet').textContent      = 'Rs. ' + fmt(netSalary);
+
+    if (monthlyTax > 0) {
+      document.getElementById('outTax').textContent    = 'Rs. ' + fmt(monthlyTax);
+      document.getElementById('outTaxSub').textContent = 'سالانہ: Rs. ' + fmt(annualGross);
+    } else {
+      document.getElementById('outTax').textContent    = 'Tax Free';
+      document.getElementById('outTaxSub').textContent = 'معاف (6 لاکھ سے کم)';
+    }
+
+    document.getElementById('results').classList.add('show');
+  }
+
+  function clearResults() {
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('err').classList.remove('show');
+  }
+
+  function reset() {
+    document.getElementById('bps').value   = '';
+    document.getElementById('basic').value = '';
+    document.getElementById('gross').value = '';
+    clearResults();
+  }
+</script>
+</body>
+</html>
